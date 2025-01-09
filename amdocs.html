@@ -13,7 +13,7 @@
       h2 {
         color: #2c3e50;
       }
-      h3 {
+      h3, .highlight {
         color: #16a085;
       }
       ul {
@@ -70,23 +70,23 @@
   <tbody>
     <tr>
       <td>1. Input</td>
-      <td>Collect messages with user consent in real-time.</td>
+      <td>Collect messages with <span class="highlight">user consent</span> in real-time.</td>
       <td>Using an app that receives user consent.</td>
     </tr>
     <tr>
       <td>2. Extraction</td>
       <td>Extract claims or key information from messages.</td>
-      <td>Using GPT-Neo LLM for claim extraction.</td>
+      <td>Using <span class="highlight">GPT-Neo</span> LLM (equivalent to GPT-3) for claim extraction.</td>
     </tr>
     <tr>
       <td>3. Verification</td>
       <td>Compare extracted claims with trusted sources.</td>
-      <td>Using Rapid API to access third-party data.</td>
+      <td>Using open-source <span class="highlight">Rapid API</span> (other options include Zyla API, google gemini API) to access third-party data.</td>
     </tr>
     <tr>
       <td>4. Output</td>
       <td>Notify users of the message's status (verified/unverified).</td>
-      <td>Using the same app to send notifications.</td>
+      <td>Send reports to user over whatsapp / Notifications from our app to flag messages along with reports</td>
     </tr>
   </tbody>
 </table>

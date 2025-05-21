@@ -103,6 +103,7 @@
 
     bookBtn.addEventListener('click', () => {
       const seats = [...selected];
+      alert("🧭 Platform: " + Telegram.WebApp.platform);
       // Send selected seats data back to bot
       Telegram.WebApp.sendData(JSON.stringify({ bookedSeats: seats }));
       Telegram.WebApp.close();

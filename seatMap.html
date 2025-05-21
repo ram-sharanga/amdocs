@@ -105,7 +105,7 @@
       const seats = [...selected];
       // Send selected seats data back to bot
       Telegram.WebApp.sendData(JSON.stringify({ bookedSeats: seats }));
-      Telegram.WebApp.close();
+      // Telegram.WebApp.close();
     });
 
     renderSeats();

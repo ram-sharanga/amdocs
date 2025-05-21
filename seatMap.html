@@ -109,16 +109,13 @@
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            bookedSeats: seats,
-            initData: Telegram.WebApp.initData,
-          }),
+          body: JSON.stringify({ bookedSeats: seats }),
         })
           .then((res) => res.json())
           .then((data) => {
             if (data.success) {
               alert("✅ Seats booked: " + seats.join(", "));
-              Telegram.WebApp.close(); // Close the Web App
+              Telegram.WebApp.close();
             } else {
               alert("❌ Booking failed: " + data.message);
             }

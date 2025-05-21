@@ -46,12 +46,18 @@
       background-color: #aaa;
       cursor: not-allowed;
     }
+    #status {
+      margin-top: 15px;
+      font-weight: bold;
+      min-height: 20px;
+    }
   </style>
 </head>
 <body>
   <h2>Select Your Seats</h2>
   <div id="seat-map"></div>
   <button id="book-btn" disabled>Book Selected Seats</button>
+  <div id="status"></div>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
@@ -62,6 +68,7 @@
 
     const seatMapDiv = document.getElementById('seat-map');
     const bookBtn = document.getElementById('book-btn');
+    const statusDiv = document.getElementById('status');
 
     function renderSeats() {
       seatMapDiv.innerHTML = '';
@@ -101,11 +108,39 @@
       bookBtn.disabled = selected.size === 0;
     }
 
-    bookBtn.addEventListener('click', () => {
+    bookBtn.addEventListener('click', async () => {
       const seats = [...selected];
-      // Send selected seats data back to bot
-      Telegram.WebApp.sendData(JSON.stringify({ bookedSeats: seats }));
-      Telegram.WebApp.close();
+      statusDiv.textContent = "Booking seats...";
+      bookBtn.disabled = true;
+
+      try {
+        const response = await fetch('https://a933-2406-7400-bb-fb48-6c0d-f55e-ce2d-16b9.ngrok-free.app/api/book-seats', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ bookedSeats: seats }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success) {
+          statusDiv.textContent = `🎉 Successfully booked seats: ${seats.join(", ")}`;
+          // Optionally close the web app after booking
+          setTimeout(() => {
+            Telegram.WebApp.close();
+          }, 2000);
+        } else {
+          statusDiv.textContent = `⚠️ Booking failed: ${data.message || 'Unknown error'}`;
+          bookBtn.disabled = false;
+        }
+      } catch (err) {
+        statusDiv.textContent = `⚠️ Error: ${err.message}`;
+        bookBtn.disabled = false;
+      }
     });
 
     renderSeats();

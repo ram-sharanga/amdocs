@@ -33,107 +33,86 @@
       color: #888;
     }
     #book-btn {
-      display: none;      /* hidden, we use Telegram.MainButton instead */
+      margin-top: 20px;
+      padding: 10px 25px;
+      font-size: 18px;
+      cursor: pointer;
+      border: none;
+      background-color: #008CBA;
+      color: white;
+      border-radius: 8px;
+    }
+    #book-btn:disabled {
+      background-color: #aaa;
+      cursor: not-allowed;
     }
   </style>
 </head>
 <body>
   <h2>Select Your Seats</h2>
   <div id="seat-map"></div>
-  <!-- fallback button if Telegram isn't available -->
-  <button id="book-btn">Book Selected Seats</button>
+  <button id="book-btn" disabled>Book Selected Seats</button>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
-    // --- Configuration ---
-    const BACKEND_URL = "https://yourbackend.com/registerBooking"; 
     const rows = ["A", "B", "C"];
     const cols = ["1", "2", "3"];
     const blockedSeats = new Set(["A2", "B3"]);
     const selected = new Set();
 
-    // --- DOM references ---
-    const seatMapDiv = document.getElementById("seat-map");
-    const fallbackBtn = document.getElementById("book-btn");
-    const tg = window.Telegram.WebApp;
+    const seatMapDiv = document.getElementById('seat-map');
+    const bookBtn = document.getElementById('book-btn');
 
-    // --- Render seats ---
     function renderSeats() {
-      seatMapDiv.innerHTML = "";
+      seatMapDiv.innerHTML = '';
       rows.forEach(row => {
         cols.forEach(col => {
-          const id = row + col;
-          const div = document.createElement("div");
-          div.textContent = id;
-          div.className = "seat";
-          if (blockedSeats.has(id)) {
-            div.classList.add("blocked");
+          const seatId = row + col;
+          const seatEl = document.createElement('div');
+          seatEl.textContent = seatId;
+          seatEl.className = 'seat';
+
+          if (blockedSeats.has(seatId)) {
+            seatEl.classList.add('blocked');
           } else {
-            div.addEventListener("click", () => {
-              if (selected.has(id)) selected.delete(id);
-              else selected.add(id);
+            seatEl.addEventListener('click', () => {
+              if (selected.has(seatId)) {
+                selected.delete(seatId);
+              } else {
+                selected.add(seatId);
+              }
               updateUI();
             });
           }
-          seatMapDiv.appendChild(div);
+          seatMapDiv.appendChild(seatEl);
         });
-        seatMapDiv.appendChild(document.createElement("br"));
+        seatMapDiv.appendChild(document.createElement('br'));
       });
     }
 
-    // --- Update UI and Telegram MainButton ---
     function updateUI() {
-      document.querySelectorAll(".seat").forEach(el => {
-        el.classList.toggle("selected", selected.has(el.textContent));
+      document.querySelectorAll('.seat').forEach(el => {
+        if (selected.has(el.textContent)) {
+          el.classList.add('selected');
+        } else {
+          el.classList.remove('selected');
+        }
       });
-      const hasSelection = selected.size > 0;
-      // configure the built‑in MainButton:
-      tg.MainButton.setText(
-        hasSelection
-          ? `Book: ${[...selected].join(", ")}`
-          : "Select seats first"
-      );
-      if (hasSelection) tg.MainButton.show();
-      else tg.MainButton.hide();
-      // fallback button:
-      fallbackBtn.disabled = !hasSelection;
+      bookBtn.disabled = selected.size === 0;
     }
 
-    // --- Booking handler ---
-    function bookSeats() {
+    bookBtn.addEventListener('click', () => {
       const seats = [...selected];
-      const payload = { user: tg.initDataUnsafe.user, bookedSeats: seats };
+      // Send selected seats data back to bot
+      Telegram.WebApp.sendData(JSON.stringify({ bookedSeats: seats }));
+      Telegram.WebApp.close();
+    });
 
-      // send to your backend
-      fetch(BACKEND_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      })
-        .then(res => {
-          if (!res.ok) throw new Error("Network response was not OK");
-          return res.json();
-        })
-        .then(data => {
-          // backend should call Bot API to send confirmation
-          tg.close();
-        })
-        .catch(err => {
-          console.error("Booking error:", err);
-          alert("❌ Booking failed. Try again.");
-        });
-    }
-
-    // --- Initialization ---
-    tg.ready();
     renderSeats();
     updateUI();
 
-    // when MainButton is clicked:
-    tg.MainButton.onClick(bookSeats);
-
-    // fallback for non‑Telegram environments:
-    fallbackBtn.addEventListener("click", bookSeats);
+    // Let Telegram Web App know the page is ready
+    Telegram.WebApp.ready();
   </script>
 </body>
 </html>

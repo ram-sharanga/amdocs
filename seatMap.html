@@ -110,6 +110,7 @@
 
     bookBtn.addEventListener('click', async () => {
       const seats = [...selected];
+      const chatId = Telegram.WebApp.initDataUnsafe?.user?.id;
       statusDiv.textContent = "Booking seats...";
       bookBtn.disabled = true;
 
@@ -119,7 +120,7 @@
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ bookedSeats: seats }),
+          body: JSON.stringify({ bookedSeats: seats, chatId }),
         });
 
         if (!response.ok) {
